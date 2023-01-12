@@ -1,0 +1,18 @@
+<html ng-app="c3po">
+<head>
+    <script src="c3po.js"></script>
+</head>
+
+<body>
+    Upload a JSON file containing the data intercepted by the rebels about the plans of the Empire
+
+    <form id="form" onsubmit="return setAction()">
+        <label for="file">File to upload</label>
+        <input type="file" id="file" accept=".json" required>
+
+        <button type="submit">Upload</button>
+    </form>
+
+    <div id="result"></div>
+</body>
+</html>
