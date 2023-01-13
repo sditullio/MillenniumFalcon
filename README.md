@@ -7,7 +7,7 @@ For reference https://github.com/lioncowlionant/developer-test
     - *mvn clean verify*
 
 
-- To lunch the application, run: 
+- To launch the application, run: 
 
     - *mvn spring-boot:run -Dspring-boot.run.arguments=[PATH_TO_INITIALIZATION_FILE]*
  
@@ -17,10 +17,10 @@ For reference https://github.com/lioncowlionant/developer-test
 
 
 - The Backend will be serving request at the following URL: http://localhost:8080/c3po/intercept
-(Accept empire.json, that is JSON object containing empire intereception as described in specification Readme)
+(Accept empire.json, that is a JSON object containing the empire intereceptions, as described in the specification Readme)
 
 
-- To lunch the GUI, visit: http://localhost:8080
+- To launch the GUI, visit: http://localhost:8080
 
 ---
 TODO:
