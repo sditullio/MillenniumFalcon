@@ -5,11 +5,8 @@ import giskard.assignment.oddscalculator.backend.model.Path;
 import giskard.assignment.oddscalculator.backend.utils.ConfigurationParser;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
-
-import static giskard.assignment.oddscalculator.MillenniumFalconApplication.paths;
 
 /**
  * Controller that receive the JSON file containing the plans of the Empire
@@ -20,6 +17,7 @@ import static giskard.assignment.oddscalculator.MillenniumFalconApplication.path
 public class C3POController {
 
     @PostMapping("/intercept")
+    @ResponseBody
     public @ResponseStatus(HttpStatus.OK) String handleInterceptions(@RequestBody EmpireInterceptions interceptions) {
         System.out.println("intercepting empire.json");
 
@@ -29,7 +27,7 @@ public class C3POController {
 
         Path path = odds.keySet().stream().toList().get(minIndex);
 
-        String showResult = "Path found to reach the destination is: " + path.toString() + " with a success probability of: " + odds.get(path);
+        String showResult = "Path: " + path.toString() + " \n\nSuccess probability: " + odds.get(path);
 
         System.out.println(showResult);
 

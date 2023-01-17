@@ -5,21 +5,19 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+
+/**
+ * Class that represents a planet node in the graph
+ * @author Samuele Di Tullio
+ */
 @Slf4j
 public class Node {
 
     @Getter
     @Setter
     private String name;
-
-    // shortestPath attribute, it is a list of nodes that describes the shortest path calculated from the starting node.
-    //@Getter
-    //@Setter
-    //private List<Node> shortestPath = new LinkedList<>();
 
 
     // The adjacentNodes attribute is used to associate immediate neighbors with edge length

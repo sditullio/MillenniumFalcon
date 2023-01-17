@@ -1,18 +1,83 @@
-<html ng-app="c3po">
-<head>
-    <script src="c3po.js"></script>
-</head>
+<!DOCTYPE html>
+<html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Millennium Falcon</title>
+            <link rel="stylesheet" href="millenniumstyle.css">
+            </head>
+        <body>
+        <script>
+            var fileTxt = "";
 
-<body>
-    Upload a JSON file containing the data intercepted by the rebels about the plans of the Empire
+            function UserAction() {
+                var jsonObj = JSON.parse(fileTxt);
 
-    <form id="form" onsubmit="return setAction()">
-        <label for="file">File to upload</label>
-        <input type="file" id="file" accept=".json" required>
+                var jsonTxt = JSON.stringify(jsonObj);
 
-        <button type="submit">Upload</button>
-    </form>
+                console.log("sending: " + jsonTxt);
 
-    <div id="result"></div>
-</body>
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "http://localhost:8080/c3po/intercept", true);
+                xhttp.onreadystatechange = () => {
+                    if (xhttp.readyState === XMLHttpRequest.DONE) {
+                        const status = xhttp.status;
+                        if (status === 0 || (status >= 200 && status < 400)) {
+                            var text = xhttp.responseText;
+                            console.log("Received: " + text);
+
+                            var node = document.getElementById("myResults");
+                            node.innerText = text;
+                        } else {
+                            console.log("Error in POST request");
+                        }
+                    }
+                };
+                xhttp.setRequestHeader("Content-type", "application/json");
+                xhttp.send(jsonTxt);
+            }
+
+            /**
+             * Log the uploaded file to the console and call /c3po/intercept REST API
+             * @param {event} Event The file loaded event
+             */
+            function setAction () {
+
+                var file = document.getElementById('file').files[0];
+                var reader = new FileReader();
+
+                reader.addEventListener("load", () => {
+                    fileTxt = reader.result;
+
+                    UserAction();
+                }, false);
+                reader.readAsText(file);
+                return;
+            }
+
+        </script>
+        <div class="upload-box">
+            <h2>Odds calculator</h2>
+            <h5>Upload interceptions:</h5>
+
+            <form id="form" onsubmit="return false">
+                <div class="file-box">
+                    <input type="file" id="file" accept=".json" required>
+                </div>
+                <a href="#" onclick="setAction()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    Upload
+                </a>
+            </form>
+        </div>
+
+        <div class="result-box">
+            <h5>Your results:</h5>
+            <div id="myResults" class="res"></div>
+        </div>
+
+
+        </body>
 </html>

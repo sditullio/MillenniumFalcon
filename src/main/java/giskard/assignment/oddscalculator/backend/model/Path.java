@@ -6,6 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
+/**
+ * Class that represents a solution path to the destination
+ * @author Samuele Di Tullio
+ */
 @Slf4j
 public class Path {
 
