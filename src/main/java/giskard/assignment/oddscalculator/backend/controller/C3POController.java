@@ -23,30 +23,33 @@ public class C3POController {
 
         Map<Path, Double> odds = ConfigurationParser.calculateOdds(interceptions);
 
-        int minIndex = calculateMinOdd(odds);
+        int minIndex = calculateMaxOdd(odds);
 
-        Path path = odds.keySet().stream().toList().get(minIndex);
-
-        String showResult = "Path: " + path.toString() + " \n\nSuccess probability: " + odds.get(path);
-
+        String showResult = "";
+        if(!odds.isEmpty()) {
+            Path path = odds.keySet().stream().toList().get(minIndex);
+            showResult = "Path: " + path.toString() + " \n\nSuccess probability: " + odds.get(path);
+        } else {
+            showResult = "Success probability: 0";
+        }
         System.out.println(showResult);
 
         return showResult;
     }
 
-    private int calculateMinOdd(Map<Path, Double> odds) {
-        Double min = Double.valueOf(100);
+    private int calculateMaxOdd(Map<Path, Double> odds) {
+        Double max = Double.valueOf(0);
         int i = 0;
-        int minIndex = 0;
+        int maxIndex = 0;
         for(Double odd : odds.values()) {
-            if(odd < min) {
-                minIndex = i;
-                min = odd;
+            if(odd > max) {
+                maxIndex = i;
+                max = odd;
             }
             i++;
         }
 
-        return minIndex;
+        return maxIndex;
 
     }
 }

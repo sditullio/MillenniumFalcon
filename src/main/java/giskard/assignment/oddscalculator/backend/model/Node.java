@@ -45,6 +45,10 @@ public class Node {
     }
 
     public int getCost(String node) {
+        if(this.getName().equals(node)) {
+            return 1;
+        }
+
         int result = 0;
         for(Destination destination : destinations) {
             if(node.equals(destination.getDestinationName())) {

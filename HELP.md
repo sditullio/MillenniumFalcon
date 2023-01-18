@@ -25,4 +25,4 @@ For reference https://github.com/lioncowlionant/developer-test
 ---
 TODO:
 - CLI implementation
-- Add algorithm to stop in one planet in order to avoid Bounty Hunters
+- Automatic tests

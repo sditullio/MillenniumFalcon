@@ -194,7 +194,7 @@ public class ConfigurationParser {
 
         int cost = 0;
         int fuel = inputConfiguration.getAutonomy();
-        for (int i = 0; i < localNodeList.size() - 2; i++) {
+        for (int i = 0; i < localNodeList.size() - 1; i++) {
             for (Destination destination : localNodeList.get(i).getDestinations()) {
                 if (destination.getDestinationName().equals(localNodeList.get(i + 1).getName())) {
                     cost += destination.getDistance();
@@ -209,7 +209,7 @@ public class ConfigurationParser {
                         newPath.add(localNodeList.get(i));
                         newPath.addAll(tail);
 
-                        cost++;
+                        cost += 1;
                         fuel = inputConfiguration.getAutonomy();
                     }
                 }
@@ -226,47 +226,92 @@ public class ConfigurationParser {
         System.out.println("Calculating odds...");
         Map<Path, Double> odds = new HashMap<>();
 
-        // number of times the Bounty Hunter tried to capture the Millennium Falcon
-        int k = 0;
+        // Update the paths list: Bounty hunters are avoided by stopping to one adjacent planet
+        List<Path> newPaths= avoidBountyHuntersIterations(interceptions, paths);
 
-        for(Path path : paths) {
-            Double odd = Double.valueOf(100);
+        // Calculate the odds
+        odds = decreaseOddsIteration(interceptions, odds, newPaths);
+
+        return odds;
+    }
+    private static List<Path> avoidBountyHuntersIterations(EmpireInterceptions interceptions, List<Path> actualPaths) {
+        List<Path> newPaths = new ArrayList<>();
+        newPaths.addAll(actualPaths);
+        int pathIndex = 0;
+        for(Path path : actualPaths) {
+            // number of times the Bounty Hunter tried to capture the Millennium Falcon
+            int k = 0;
+            Path newPath = path;
             // if the Millennium Falcon cannot reach Endor before the Death Star annihilates Endor, the probability of success is 0
-            if(path.getCost() <= interceptions.getCountdown()) {
-                int day = 1;
-                int landed = 0;
-                for(int i = 0; i < path.getNodes().size() - 2; i++) {
+            if (path.getCost() <= interceptions.getCountdown()) {
+                int day = 0;
+                for (int i = 0; i < path.getNodes().size() - 1; i++) {
                     Node node = path.getNodes().get(i);
-                    Node nextNode = path.getNodes().get(i+1);
+                    Node nextNode = path.getNodes().get(i + 1);
+                    for (BountyHunter bountyHunter : interceptions.getBounty_hunters()) {
+                        // If Millennium Falcon pass by (or refuel) in a planet the same day in which the Bounty Hunter is expected, decrease the odds of success
+                        if (node.getName().equals(bountyHunter.getPlanet()) && day == bountyHunter.getDay()) {
+                            //If Millennium Falcon has enough days to reach the destination, avoid the planet with bounty hunters by landing one more day in the previous planet
+                            if (interceptions.getCountdown() - newPath.getCost() > 0) {
+                                newPath = avoidBountyHunters(newPath, path.getNodes().get(i - 1).getName(), newPath.getCost());
+                                newPaths.remove(pathIndex);
+                                newPaths.add(pathIndex, newPath);
+                            }
+                        }
+                    }
                     day += node.getCost(nextNode.getName());
+                }
+            }
+            pathIndex++;
+        }
+        return newPaths;
+    }
+
+    private static Map<Path, Double> decreaseOddsIteration(EmpireInterceptions interceptions, Map<Path, Double> odds, List<Path> actualPaths) {
+        for(Path path : actualPaths) {
+            // number of times the Bounty Hunter tried to capture the Millennium Falcon
+            int k = 0;
+            Double odd = Double.valueOf(100);
+            Path newPath = path;
+            // if the Millennium Falcon cannot reach Endor before the Death Star annihilates Endor, the probability of success is 0
+            if (path.getCost() <= interceptions.getCountdown()) {
+                int day = 0;
+                for (int i = 0; i < path.getNodes().size() - 1; i++) {
+                    Node node = path.getNodes().get(i);
+                    Node nextNode = path.getNodes().get(i + 1);
                     for (BountyHunter bountyHunter : interceptions.getBounty_hunters()) {
                         // If Millennium Falcon pass by (or refuel) in a planet the same day in which the Bounty Hunter is expected, decrease the odds of success
                         if (node.getName().equals(bountyHunter.getPlanet()) && day == bountyHunter.getDay()) {
                             odd = decreaseOdds(odd, k);
                             k += 1;
                         }
-
-                        //TODO: If Millennium Falcon has enough days to reach the destination, avoid the planet with bounty hunters by landing one more day in the actual planet
-                        /*if(i < path.getNodes().size() - 3) {
-                            int tempDay = nextNode.getCost(path.getNodes().get(i + 1).getName());
-                            if (nextNode.getName().equals(bountyHunter.getPlanet()) && day == bountyHunter.getDay()) {
-
-                                if (path.getCost() - interceptions.getCountdown() - landed > 0) {
-
-                                }
-                            }
-                        }*/
                     }
+                    day += node.getCost(nextNode.getName());
                 }
-
-                System.out.println("Odd for path " + path.toString() + ": = " + odd);
-            } else {
-                odd = Double.valueOf(0);
+                System.out.println("Odd for path " + newPath.toString() + ": = " + odd);
+                odds.put(newPath, odd);
             }
-            odds.put(path, odd);
+        }
+        return odds;
+    }
+
+    private static Path avoidBountyHunters(Path path, String planetToStay, int cost) {
+        int step = 0;
+        int i = 0;
+        for(Node node : path.getNodes()) {
+            if(node.getName().equals(planetToStay)) {
+                step = i;
+                break;
+            }
+            i++;
         }
 
-        return odds;
+        List<Node> newNodes = new ArrayList<>();
+        newNodes.addAll(path.getNodes().subList(0, step));
+        //Avoid bounty hunters by landing one more day in a nearby planet
+        newNodes.add(path.getNodes().get(step));
+        newNodes.addAll(path.getNodes().subList(step, path.getNodes().size()));
+        return new Path(newNodes, cost+1);
     }
 
     private static double decreaseOdds(double odds, int k) {
